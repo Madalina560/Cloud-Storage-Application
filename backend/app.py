@@ -1,42 +1,36 @@
-import sys
-from Crypto.Cipher import AES
-from Crypto.Hash import HMAC, SHA256
-from Crypto.Random import get_random_bytes
+from io import BytesIO
+from flask import Flask, render_template, request, redirect, send_file
+from flask_sqlalchemy import SQLAlchemy
 
-# used pyCryptodome documentation to get started: https://pycryptodome.readthedocs.io/en/latest/src/examples.html#encrypt-data-with-aes
+# file uploading & downloading tutorial followed:
+# https://www.geeksforgeeks.org/uploading-and-downloading-files-in-flask/
 
-data = 'transmit secret data hehe'.encode()
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-# encrypt
-aesKey = get_random_bytes(16)
-hmacKey = get_random_bytes(16)
+class Upload(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    filename = db.Column(db.String(50))
+    data = db.Column(db.LargeBinary)
 
-cipher = AES.new(aesKey, AES.MODE_CTR)
-ciphertext = cipher.encrypt(data)
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        file = request.files['file']
+        upload = Upload(filename = file.filename, data = file.read())
+        db.session.add(upload)
+        db.session.commit()
+        return redirect('/')
+    files = Upload.query.all()
+    return render_template('index.html', files = files)
 
-hmac = HMAC.new(hmacKey, digestmod=SHA256)
-tag = hmac.update(cipher.nonce + ciphertext).digest()
+@app.route('/download/<upload_id>')
+def download_file(upload_id):
+    upload = Upload.query.filter_by(id = upload_id).first()
+    return send_file(BytesIO(upload.data), download_name=upload.filename, as_attachment=True)
 
-with open("encrypted.bin", "wb") as f:
-    f.write(tag)
-    f.write(cipher.nonce)
-    f.write(ciphertext)
-    print("Message encoded")
-
-# decrypt
-with open("encrypted.bin", "rb") as f:
-    tag = f.read(32)
-    nonce = f.read(8)
-    ciphertext = f.read()
-    print("Message decoded")
-
-try:
-    hmac = HMAC.new(hmacKey, digestmod=SHA256)
-    tag = hmac.update(nonce + ciphertext).verify(tag)
-except ValueError:
-    print("Message modified")
-    sys.exit(1)
-
-cipher = AES.new(aesKey, AES.MODE_CTR, nonce = nonce)
-message = cipher.decrypt(ciphertext)
-print("Message:, ", message.decode())
+if __name__ == '__main__':
+    db.create_all()
+    app.run(debug=True)
