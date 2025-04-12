@@ -1,9 +1,13 @@
 from io import BytesIO
 from flask import Flask, render_template, request, redirect, send_file
 from flask_sqlalchemy import SQLAlchemy
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 
 # file uploading & downloading tutorial followed:
 # https://www.geeksforgeeks.org/uploading-and-downloading-files-in-flask/
+
+aesKey = get_random_bytes(16)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -20,7 +24,16 @@ def index():
     if request.method == 'POST':
         file = request.files['file']
         upload = Upload(filename = file.filename, data = file.read())
-        db.session.add(upload)
+        # setting up cipher & ciphertext 
+        cipher = AES.new(aesKey, AES.MODE_OCB)
+        ciphertext, tag = cipher.encrypt_and_digest(upload.data)
+        assert len(cipher.nonce) == 15
+
+        # encryption
+        encryptedData = tag + cipher.nonce + ciphertext
+        encryptUpload = Upload(filename = file.filename + ".enc", data = encryptedData)
+
+        db.session.add(encryptUpload)  # upload encrypted file
         db.session.commit()
         return redirect('/')
     files = Upload.query.all()
