@@ -1,0 +1,23 @@
+.center{
+    margin: auto;
+    text-align: center;
+    font-family: "Orbitron", sans-serif;
+}
+
+.ok{
+		
+    font-size: 20px;
+}
+.op{
+    font-size: 20px;
+    margin-left: -70px;
+    font-weight: bold;
+    background-color: #cccccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0; /* remove any left padding */
+}

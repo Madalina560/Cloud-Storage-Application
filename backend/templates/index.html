@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+	<title>File Encryption</title>
+
+</head>
+<body>
+	<div class="center">
+		<h1> Uploading and Returning Files With a Database in Flask </h1>
+		<form method="POST" action="/" enctype="multipart/form-data">
+			<input class="ok" type="file" name="file">
+			<button class="op">Upload</button>
+		</form>
+
+        <ul>
+			{% for file in files %}
+				<li>
+					<a href="{{ url_for('download_file', upload_id=file.id) }}">{{ file.filename }}</a>
+				</li>
+			{% else %}
+				<li>No files uploaded yet.</li>
+			{% endfor %}
+		</ul>
+
+	</div>
+	
+</body>
+</html>
