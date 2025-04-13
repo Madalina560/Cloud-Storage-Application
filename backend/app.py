@@ -1,5 +1,5 @@
 from io import BytesIO
-from flask import Flask, render_template, request, redirect, send_file, url_for, session
+from flask import Flask, render_template, request, redirect, send_file, url_for, session, g
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -29,14 +29,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique = True, nullable = False)
     password = db.Column(db.String(80), nullable = False)
     aesKey = db.Column(db.LargeBinary(16), nullable = False)
-'''
-def createUser(username):
-    aesKey = get_random_bytes(16)
-    user = User(username = username, aesKey = aesKey)
-    db.session.add(user)
-    db.session.commit()
-    # potentially no longer need
-'''
+
 
 @app.route('/')
 def loginPage():
@@ -73,7 +66,12 @@ def home():
 
 @app.route('/download/<upload_id>')
 def download_file(upload_id):
+    if g.user is None:
+        return redirect('/login') # go back to login if no user
+    
     upload = Upload.query.filter_by(id = upload_id).first()
+    if not upload or upload.userID != g.user.id:
+        return "No permission to download, Not logged in to correct account", 403
     user = upload.user
 
     binary = upload.data
@@ -120,6 +118,15 @@ def login():
         session['user_id'] = user.id
         return redirect(url_for('home'))
     return "Invalid username or password", 401
+
+# login helper
+@app.before_request
+def loadUser():
+    userID = session.get('user_id')
+    if userID:
+        g.user = User.query.get(userID)
+    else:
+        g.user = None
 
 if __name__ == '__main__':
     db.create_all()
