@@ -16,3 +16,8 @@
     border-radius: 5px;
     cursor: pointer;
 }
+
+ul {
+    list-style-type: none;
+    padding-left: 0; /* remove any left padding */
+}
