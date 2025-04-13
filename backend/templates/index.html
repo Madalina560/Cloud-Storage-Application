@@ -17,15 +17,19 @@
 			<button class="op">Upload</button>
 		</form>
 
+		{% if files %}
         <ul>
 			{% for file in files %}
 				<li>
-					<a href="{{ url_for('download_file', upload_id=file.id) }}">{{ file.filename }}</a>
+					{{ file.filename }}
+					(Uploaded by: {{ file.user.username }})
+					<a href="{{ url_for('download_file', upload_id=file.id) }}">Download</a>
 				</li>
 			{% else %}
 				<li>No files uploaded yet.</li>
 			{% endfor %}
 		</ul>
+		{% endif %}
 
 	</div>
 	
