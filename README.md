@@ -6,12 +6,12 @@ You need to create a database before running the flask server
 1. Navigate to the `backend` folder
 2. Open a terminal in that directory and run `flask shell`
 3. run the following commands
-   `from app import db`
-   `db.create_all()`
-   `exit()`
+   `from app import db`  
+   `db.create_all()`  
+   `exit()`  
 
 If you choose to delete the table, run:
-    `db.drop_all()`
+    `db.drop_all()`  
 ⚠️ THIS DOES DELETE ALL OF YOUR DATA
 
 # How to run
