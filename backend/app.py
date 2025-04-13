@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, send_file, url_for,
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-import sys
 
 # file uploading & downloading tutorial followed:
 # https://www.geeksforgeeks.org/uploading-and-downloading-files-in-flask/
