@@ -5,7 +5,7 @@ Repository to store code for Assignment 2 of Advanced Computer Networks
 You need to create a database before running the flask server
 1. Navigate to the `backend` folder
 2. Open a terminal in that directory and run `flask shell`
-3. run the following commands
+3. run the following commands  
    `from app import db`  
    `db.create_all()`  
    `exit()`  
